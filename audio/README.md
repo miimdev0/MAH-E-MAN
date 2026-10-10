@@ -1,5 +1,6 @@
 # Optional music
 
-The project currently includes `song.mp3`. Playback is optional and starts only
-when the listener taps the music button (mobile browsers block reliable autoplay).
-Replace the track only with audio you have permission to distribute.
+The project currently includes `song.mp3`. The installed Android app attempts to
+play it automatically on launch; browser previews still require a tap because
+browser autoplay policies differ. Replace the track only with audio you have
+permission to distribute.

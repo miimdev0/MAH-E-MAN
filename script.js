@@ -53,7 +53,16 @@
   const announcer = $("#screen-announcer");
   const errorBox = $("#timer-error");
   const loadingScreen = $("#loading-screen");
+  const loadingCaption = $("#loading-caption");
+  const loadingCountdown = $("#loading-countdown");
   const loadingStartedAt = performance.now();
+  const secretTestTrigger = $("#secret-test-trigger");
+  const secretTestDialog = $("#secret-test-dialog");
+  const secretTestForm = $("#secret-test-form");
+  const secretTestCode = $("#secret-test-code");
+  const secretTestError = $("#secret-test-error");
+  const secretTestCancel = $("#secret-test-cancel");
+  const developerToolsLock = $("#developer-tools-lock");
   const soundButton = $("#sound-toggle");
   const musicButton = $("#music-toggle");
   const musicPlayer = $("#background-music");
@@ -76,9 +85,10 @@
   const readAgainButton = $("#read-again-button");
 
   const allowedDevHosts = new Set(["", "localhost", "127.0.0.1", "[::1]", "::1"]);
-  const developerToolsEnabled = APP_CONFIG.environment === "development"
+  const developerToolsAvailableLocally = APP_CONFIG.environment === "development"
     && APP_CONFIG.enableDeveloperTools === true
     && allowedDevHosts.has(window.location.hostname);
+  let developerToolsEnabled = developerToolsAvailableLocally;
 
   let targetTimestamp = Number.NaN;
   let currentMainState = null;
@@ -88,13 +98,29 @@
   let lastRevealLine = -2;
   let simulationClock = null;
   let developmentProgress = null;
+  let loadingTimer = 0;
 
   function persianDigits(value) {
     return String(value).replace(/[0-9]/g, digit => PERSIAN_DIGITS[digit.charCodeAt(0) - 48]);
   }
 
+  function latinDigits(value) {
+    return String(value).replace(/[۰-۹٠-٩]/g, digit => {
+      const persianIndex = PERSIAN_DIGITS.indexOf(digit);
+      const arabicIndex = "٠١٢٣٤٥٦٧٨٩".indexOf(digit);
+      return String(persianIndex >= 0 ? persianIndex : arabicIndex);
+    });
+  }
+
   function paddedPersian(value) {
     return persianDigits(String(value).padStart(2, "0"));
+  }
+
+  function isNativeRuntime() {
+    const capacitor = window.Capacitor;
+    if (!capacitor) return false;
+    if (typeof capacitor.isNativePlatform === "function") return capacitor.isNativePlatform();
+    return typeof capacitor.getPlatform === "function" && capacitor.getPlatform() !== "web";
   }
 
   function wallTimeToEpoch(fields, timeZone) {
@@ -208,12 +234,29 @@
 
   function dismissLoadingScreen() {
     if (!loadingScreen) return;
-    const minimumTime = 760;
-    const remaining = Math.max(0, minimumTime - (performance.now() - loadingStartedAt));
-    window.setTimeout(() => {
+    if (loadingTimer) window.clearTimeout(loadingTimer);
+
+    const loadingDuration = 15_000;
+    const elapsed = Math.max(0, performance.now() - loadingStartedAt);
+    const remaining = Math.max(0, loadingDuration - elapsed);
+    const phaseMessages = [
+      "ماه، داره از دلِ شب بیدار می‌شه…",
+      "ستاره‌ها دارن مدارشون رو پیدا می‌کنن…",
+      "لحظه‌ی تو داره آماده می‌شه…",
+      "همه‌چیز برای تو آماده‌ست…"
+    ];
+    const phase = Math.min(phaseMessages.length - 1, Math.floor(elapsed / (loadingDuration / phaseMessages.length)));
+    if (loadingCountdown) loadingCountdown.textContent = persianDigits(Math.ceil(remaining / SECOND));
+    if (loadingCaption && loadingCaption.textContent !== phaseMessages[phase]) loadingCaption.textContent = phaseMessages[phase];
+    if (remaining <= 360) loadingScreen.classList.add("is-exiting");
+
+    if (remaining <= 0) {
+      loadingTimer = 0;
       loadingScreen.classList.add("is-hidden");
       loadingScreen.setAttribute("aria-hidden", "true");
-    }, remaining);
+      return;
+    }
+    loadingTimer = window.setTimeout(dismissLoadingScreen, Math.min(1000, remaining));
   }
 
   function activateScreen(sceneName) {
@@ -275,7 +318,7 @@
   }
 
   function updateWaitingCountdown(now) {
-    const wholeSeconds = Math.max(0, Math.floor((targetTimestamp - now) / SECOND));
+    const wholeSeconds = Math.max(0, Math.ceil((targetTimestamp - now) / SECOND));
     const values = {
       days: Math.floor(wholeSeconds / 86_400),
       hours: Math.floor((wholeSeconds % 86_400) / 3_600),
@@ -580,7 +623,7 @@
     }
 
     async function initialize() {
-      if (!musicButton || !musicPlayer || typeof window.fetch !== "function") return;
+      if (!musicButton || !musicPlayer) return;
       musicPlayer.volume = 0.52;
       musicPlayer.addEventListener("play", paintButton);
       musicPlayer.addEventListener("pause", paintButton);
@@ -590,6 +633,20 @@
         paintButton();
         announce("فایل آهنگ پیدا نشد؛ تجربه بدون موسیقی هم کامله.");
       });
+
+      if (isNativeRuntime()) {
+        available = true;
+        paintButton();
+        try {
+          await musicPlayer.play();
+          paintButton();
+        } catch (_error) {
+          announce("اگر آهنگ خودکار شروع نشد، دکمه‌ی موسیقی رو بزن.");
+        }
+        return;
+      }
+
+      if (typeof window.fetch !== "function") return;
       try {
         const trackUrl = new URL("audio/song.mp3", document.baseURI);
         const response = await window.fetch(trackUrl.href, { method: "HEAD", cache: "no-store" });
@@ -598,7 +655,7 @@
         available = true;
         paintButton();
       } catch (_error) {
-        /* The optional audio/song.mp3 file has not been added yet. */
+        /* Keep the optional web player hidden when the track is unavailable. */
       }
     }
 
@@ -620,13 +677,6 @@
     const REMINDER_ID = 20261011;
     const OPT_IN_KEY = "mah-e-man:reminder-opt-in:v1";
     let active = false;
-
-    function isNativeRuntime() {
-      const capacitor = window.Capacitor;
-      if (!capacitor) return false;
-      if (typeof capacitor.isNativePlatform === "function") return capacitor.isNativePlatform();
-      return typeof capacitor.getPlatform === "function" && capacitor.getPlatform() !== "web";
-    }
 
     function setStatus(message, enabled = active) {
       if (notificationStatus) notificationStatus.textContent = message;
@@ -684,6 +734,7 @@
       }
 
       try {
+        setStatus("در حال درخواست مجوز از سیستم اعلانِ اندروید…", false);
         const plugin = await getNativePlugin();
         let permission = await plugin.checkPermissions();
         if (permission.display !== "granted") permission = await plugin.requestPermissions();
@@ -1044,10 +1095,12 @@
   })();
 
   function setupDeveloperTools() {
-    if (!developerToolsEnabled || !devPanel) return;
-    devPanel.hidden = false;
+    if (!devPanel) return;
+    devPanel.hidden = !developerToolsEnabled;
+    if (developerToolsLock) developerToolsLock.hidden = developerToolsAvailableLocally;
     $$('[data-dev-stage]', devPanel).forEach(button => {
       button.addEventListener("click", () => {
+        if (!developerToolsEnabled) return;
         const stage = button.dataset.devStage;
         const offsets = {
           waiting: -10 * 60 * SECOND,
@@ -1073,6 +1126,64 @@
     });
   }
 
+  function openSecretTestDialog() {
+    if (!secretTestDialog) return;
+    if (secretTestCode) {
+      secretTestCode.value = "";
+      secretTestCode.removeAttribute("aria-invalid");
+    }
+    if (secretTestError) secretTestError.hidden = true;
+    if (typeof secretTestDialog.showModal === "function") secretTestDialog.showModal();
+    else secretTestDialog.setAttribute("open", "");
+    window.requestAnimationFrame(() => secretTestCode?.focus());
+  }
+
+  function lockSecretTestMode() {
+    if (developerToolsAvailableLocally) return;
+    developerToolsEnabled = false;
+    simulationClock = null;
+    developmentProgress = null;
+    lastFinalMessage = -1;
+    lastRevealLine = -2;
+    if (devPanel) devPanel.hidden = true;
+    if (developerToolsLock) developerToolsLock.hidden = true;
+    announce("حالت آزمایش بسته شد و شمارش واقعی برگشت.");
+    updateAndSchedule();
+  }
+
+  function setupSecretTester() {
+    if (secretTestTrigger) secretTestTrigger.addEventListener("click", openSecretTestDialog);
+    if (secretTestCancel) {
+      secretTestCancel.addEventListener("click", () => {
+        if (secretTestDialog?.open && typeof secretTestDialog.close === "function") secretTestDialog.close();
+        else secretTestDialog?.removeAttribute("open");
+      });
+    }
+    if (secretTestForm) {
+      secretTestForm.addEventListener("submit", event => {
+        event.preventDefault();
+        if (!secretTestCode || latinDigits(secretTestCode.value) !== "1592") {
+          if (secretTestError) secretTestError.hidden = false;
+          if (secretTestCode) {
+            secretTestCode.setAttribute("aria-invalid", "true");
+            secretTestCode.focus();
+          }
+          return;
+        }
+        developerToolsEnabled = true;
+        if (devPanel) devPanel.hidden = false;
+        if (developerToolsLock) developerToolsLock.hidden = false;
+        if (secretTestError) secretTestError.hidden = true;
+        secretTestCode.removeAttribute("aria-invalid");
+        if (secretTestDialog?.open && typeof secretTestDialog.close === "function") secretTestDialog.close();
+        else secretTestDialog?.removeAttribute("open");
+        announce("حالت آزمایش باز شد؛ از پنل پایین یکی از صحنه‌ها رو انتخاب کن.");
+        window.requestAnimationFrame(() => $$('[data-dev-stage]', devPanel || document)[0]?.focus());
+      });
+    }
+    if (developerToolsLock) developerToolsLock.addEventListener("click", lockSecretTestMode);
+  }
+
   function initialize() {
     enableMaterialSymbolsWhenAvailable();
     void enableOptionalDoranFont();
@@ -1084,6 +1195,7 @@
     if (readAgainButton) readAgainButton.addEventListener("click", () => moveToRevealedScene("letter", true));
 
     setupDeveloperTools();
+    setupSecretTester();
     sky.resize();
     window.addEventListener("resize", sky.resize, { passive: true });
     window.addEventListener("orientationchange", sky.resize, { passive: true });
@@ -1093,11 +1205,13 @@
         scheduledUpdate = 0;
         sky.pause();
       } else {
+        dismissLoadingScreen();
         sky.resume();
         updateAndSchedule();
       }
     });
     window.addEventListener("pageshow", () => {
+      dismissLoadingScreen();
       sky.resume();
       updateAndSchedule();
     });

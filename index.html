@@ -63,7 +63,8 @@
       </div>
       <p class="loading-brand">ماه من <span lang="en" dir="ltr">MAH-E MAN</span></p>
       <span class="loading-track" aria-hidden="true"><span></span></span>
-      <p class="loading-caption">داریم ماه رو برای یه لحظه‌ی قشنگ روشن می‌کنیم</p>
+      <span id="loading-countdown" class="loading-countdown" aria-hidden="true">۱۵</span>
+      <p id="loading-caption" class="loading-caption">ماه، داره از دلِ شب بیدار می‌شه…</p>
     </div>
   </div>
 
@@ -104,8 +105,7 @@
           <span class="moon-star moon-star-three"></span>
         </div>
         <div class="waiting-copy">
-          <h1 id="waiting-heading" class="opening-line">ماهیِ من... یه اتفاق قشنگ در راهه. <span class="text-moon" aria-hidden="true">🌙</span></h1>
-          <p class="second-line">بعضی لحظه‌ها، ارزش تمامِ انتظار رو دارن.</p>
+          <h1 id="waiting-heading" class="opening-line">ماهیِ من، لحظه‌ی قشنگت نزدیکه. <span class="text-moon" aria-hidden="true">🌙</span></h1>
         </div>
         <div class="countdown-block">
           <p class="countdown-caption">تا رسیدنِ اون لحظه</p>
@@ -117,9 +117,8 @@
           </div>
         </div>
         <p class="countdown-date"><span class="date-star" aria-hidden="true">✦</span> ۱۱ اکتبر ۲۰۲۶ <i aria-hidden="true"></i> ساعت ۰۰:۰۰ تهران</p>
-        <p class="secret-note">این راز، سرِ وقتش خودش رو نشون می‌ده<span class="note-ellipsis" aria-hidden="true">...</span></p>
         <div class="reminder-panel">
-          <p class="reminder-prompt">می‌خوای لحظه‌ی موعود رو یادت بندازم؟</p>
+          <p class="reminder-prompt">یادآوری روی گوشی</p>
           <button id="notification-toggle" class="reminder-button" type="button" aria-pressed="false" aria-describedby="notification-status">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/><path d="M10 17h4"/></svg>
             <span>فعال کردن اعلان گوشی</span>
@@ -215,6 +214,21 @@
     </section>
   </main>
 
+  <button id="secret-test-trigger" class="secret-test-trigger" type="button" aria-label="باز کردن ورود مخفیِ آزمایش"><span aria-hidden="true">✦</span></button>
+  <dialog id="secret-test-dialog" class="secret-test-dialog" aria-labelledby="secret-test-title">
+    <form id="secret-test-form" class="secret-test-form" novalidate>
+      <p class="secret-test-kicker">درگاهِ پنهان</p>
+      <h2 id="secret-test-title">حالت آزمایش</h2>
+      <label for="secret-test-code">رمز چهاررقمی</label>
+      <input id="secret-test-code" name="secret-test-code" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" required>
+      <p id="secret-test-error" class="secret-test-error" role="alert" hidden>رمز درست نیست؛ دوباره امتحان کن.</p>
+      <div class="secret-test-actions">
+        <button id="secret-test-cancel" class="secret-test-cancel" type="button">بستن</button>
+        <button class="secret-test-submit" type="submit">باز کردن پنل</button>
+      </div>
+    </form>
+  </dialog>
+
   <audio id="background-music" src="audio/song.mp3" preload="none" loop aria-hidden="true"></audio>
   <p id="screen-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></p>
   <p id="timer-error" class="timer-error" role="alert" hidden></p>
@@ -227,6 +241,7 @@
       <button type="button" data-dev-stage="reveal">لحظه‌ی رونمایی</button>
       <button type="button" data-dev-stage="letter">نامه</button>
       <button type="button" data-dev-stage="ending">پایان</button>
+      <button id="developer-tools-lock" type="button" hidden>قفل و بازگشت به زمان واقعی</button>
     </div>
   </aside>
 

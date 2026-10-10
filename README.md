@@ -31,7 +31,7 @@ Run a static server from the repository root, for example:
 python3 -m http.server 8000 --bind 0.0.0.0
 ```
 
-Open `http://localhost:8000/`. A short illustrated loading screen introduces the experience; the home scene then displays the countdown target and Tehran time. The countdown is based on **11 October 2026 at 00:00 in `Asia/Tehran`**, converted with the browser's IANA time-zone database (no hard-coded offset). It resynchronizes on foreground/focus and limits continuous canvas animation to the moments that need it, so the second display stays responsive without a busy background loop. As with any static client-side page, the device clock and local storage are not a trusted security boundary; this protects against accidental early display, not intentional tampering.
+Open `http://localhost:8000/`. A 15-second animated intro leads into the minimal, orbital home scene. The countdown is based on **11 October 2026 at 00:00 in `Asia/Tehran`**, converted with the browser's IANA time-zone database (no hard-coded offset); the displayed seconds round up and the timer resynchronizes on foreground/focus. Continuous canvas animation is limited to the moments that need it, keeping the countdown responsive without a busy background loop. As with any static client-side page, the device clock and local storage are not a trusted security boundary; this protects against accidental early display, not intentional tampering.
 
 To preview every scene without waiting, temporarily change `APP_CONFIG` near the top of `script.js` to:
 
@@ -40,7 +40,7 @@ environment: "development",
 enableDeveloperTools: true,
 ```
 
-Keep the target settings below it unchanged and open the page on `localhost`. A local-only panel previews waiting, the final countdown, reveal, letter, and ending using the same rendering/state code. Test progress is kept out of production storage. Restore `environment: "production"` and `enableDeveloperTools: false` before publishing. A query parameter cannot enable this mode.
+Keep the target settings below it unchanged and open the page on `localhost`. A local-only panel previews waiting, the final countdown, reveal, letter, and ending using the same rendering/state code. In production, tap the nearly invisible star at the lower-right edge and enter **1592** to open the same test panel; choose a scene, then lock the panel to return to the real timer. This is a client-side testing shortcut, not a security feature, and test progress is never written to production storage. Restore `environment: "production"` and `enableDeveloperTools: false` before publishing. A query parameter cannot enable this mode.
 
 ## Icon
 
@@ -52,7 +52,7 @@ The root `font/` folder contains Vazirmatn Arabic/Persian and Latin WOFF2 subset
 
 ## Music
 
-The project currently includes a track at **`audio/song.mp3`**. Music is optional and starts only after the visitor taps the music button; it never autoplays. The separate sound button plays quiet synthesized chimes. To replace the track, use a file you have permission to distribute; the music button appears only when `audio/song.mp3` is available. The website and APK workflows package that file.
+The project currently includes a track at **`audio/song.mp3`**. In the installed Android app it attempts to start automatically on launch; the Android WebView is configured to allow that. In an ordinary browser preview, playback remains tap-to-start because browser autoplay policies vary. The separate sound button plays quiet synthesized chimes. To replace the track, use audio you have permission to distribute. The website and APK workflows package the file.
 
 ## Notifications
 

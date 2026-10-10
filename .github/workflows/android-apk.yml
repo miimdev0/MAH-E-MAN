@@ -55,7 +55,6 @@ jobs:
           cp assets/icon.svg www/assets/icon.svg
           cp assets/icons/icon-192.png assets/icons/icon-512.png www/assets/icons/
           cp -R font/. www/font/
-          rm -f www/font/.gitkeep
           for asset in audio/*; do
             [[ -f "$asset" ]] || continue
             case "$(basename "$asset")" in .gitkeep|README.md) continue ;; esac
@@ -65,12 +64,24 @@ jobs:
           test -f www/index.html
           test -f www/font/vazirmatn-arabic-wght-normal.woff2
           test -f www/assets/icons/icon-512.png
+          test -f www/audio/song.mp3
 
       - name: Generate the Android project
         run: npx cap add android
 
+      - name: Enable app-only audio autoplay in Android WebView
+        run: python3 scripts/configure-android-autoplay.py
+
       - name: Sync the web app and local notifications plugin
         run: npx cap sync android
+
+      - name: Verify native autoplay and Android notification permission
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'setMediaPlaybackRequiresUserGesture(false)' android/app/src/main/java/com/mojtaba/maheman/MainActivity.java
+          grep -q 'android.permission.POST_NOTIFICATIONS' node_modules/@capacitor/local-notifications/android/src/main/AndroidManifest.xml
+          test -f android/app/src/main/assets/public/audio/song.mp3
 
       - name: Apply the MAH-E MAN Android launcher and notification icons
         shell: bash

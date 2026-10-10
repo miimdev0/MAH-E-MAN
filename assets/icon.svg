@@ -43,18 +43,20 @@
   </defs>
   <rect width="512" height="512" rx="112" fill="url(#night)"/>
   <circle cx="256" cy="250" r="238" fill="url(#aura)"/>
-  <circle cx="256" cy="256" r="216" fill="none" stroke="#ffd6e7" stroke-opacity=".075" stroke-width="1.4"/>
-  <circle cx="256" cy="256" r="200" fill="none" stroke="#e8c58a" stroke-opacity=".09" stroke-width="1"/>
-  <ellipse cx="256" cy="256" rx="170" ry="218" fill="none" stroke="url(#orbit)" stroke-width="2" transform="rotate(-29 256 256)"/>
-  <ellipse cx="256" cy="256" rx="192" ry="132" fill="none" stroke="#f18ab8" stroke-opacity=".11" stroke-width="1.2" transform="rotate(29 256 256)"/>
-  <circle cx="222" cy="266" r="157" fill="url(#moon)" mask="url(#crescent)"/>
-  <path d="M130 328c26 48 67 77 117 82" fill="none" stroke="#fff5f0" stroke-opacity=".42" stroke-width="2" stroke-linecap="round"/>
-  <path d="M329 151c8 50 22 72 69 88-47 14-61 38-69 91-9-53-22-77-70-91 48-16 61-38 70-88Z" fill="url(#star)" opacity=".96" filter="url(#glow)"/>
-  <path d="M329 222c-11-14-31-8-31 8 0 18 31 37 31 37s31-19 31-37c0-16-20-22-31-8Z" fill="#47162f" stroke="#fff2e8" stroke-opacity=".72" stroke-width="2.5"/>
-  <path d="M171 161c2 13 8 19 21 21-13 2-19 8-21 21-2-13-8-19-21-21 13-2 19-8 21-21Z" fill="#f18ab8"/>
-  <path d="M381 346c1.5 10 6 14.5 16 16-10 1.5-14.5 6-16 16-1.5-10-6-14.5-16-16 10-1.5 14.5-6 16-16Z" fill="#e8c58a"/>
-  <circle cx="404" cy="192" r="4" fill="#fff5f0" opacity=".9"/>
-  <circle cx="120" cy="244" r="3" fill="#e8c58a" opacity=".85"/>
-  <circle cx="256" cy="102" r="2.5" fill="#ffd6e7" opacity=".72"/>
-  <circle cx="355" cy="408" r="2.2" fill="#fff5f0" opacity=".75"/>
+  <g transform="translate(256 256) scale(.76) translate(-256 -256)">
+    <circle cx="256" cy="256" r="216" fill="none" stroke="#ffd6e7" stroke-opacity=".075" stroke-width="1.4"/>
+    <circle cx="256" cy="256" r="200" fill="none" stroke="#e8c58a" stroke-opacity=".09" stroke-width="1"/>
+    <ellipse cx="256" cy="256" rx="170" ry="218" fill="none" stroke="url(#orbit)" stroke-width="2" transform="rotate(-29 256 256)"/>
+    <ellipse cx="256" cy="256" rx="192" ry="132" fill="none" stroke="#f18ab8" stroke-opacity=".11" stroke-width="1.2" transform="rotate(29 256 256)"/>
+    <circle cx="222" cy="266" r="157" fill="url(#moon)" mask="url(#crescent)"/>
+    <path d="M130 328c26 48 67 77 117 82" fill="none" stroke="#fff5f0" stroke-opacity=".42" stroke-width="2" stroke-linecap="round"/>
+    <path d="M329 151c8 50 22 72 69 88-47 14-61 38-69 91-9-53-22-77-70-91 48-16 61-38 70-88Z" fill="url(#star)" opacity=".96" filter="url(#glow)"/>
+    <path d="M329 222c-11-14-31-8-31 8 0 18 31 37 31 37s31-19 31-37c0-16-20-22-31-8Z" fill="#47162f" stroke="#fff2e8" stroke-opacity=".72" stroke-width="2.5"/>
+    <path d="M171 161c2 13 8 19 21 21-13 2-19 8-21 21-2-13-8-19-21-21 13-2 19-8 21-21Z" fill="#f18ab8"/>
+    <path d="M381 346c1.5 10 6 14.5 16 16-10 1.5-14.5 6-16 16-1.5-10-6-14.5-16-16 10-1.5 14.5-6 16-16Z" fill="#e8c58a"/>
+    <circle cx="404" cy="192" r="4" fill="#fff5f0" opacity=".9"/>
+    <circle cx="120" cy="244" r="3" fill="#e8c58a" opacity=".85"/>
+    <circle cx="256" cy="102" r="2.5" fill="#ffd6e7" opacity=".72"/>
+    <circle cx="355" cy="408" r="2.2" fill="#fff5f0" opacity=".75"/>
+  </g>
 </svg>
