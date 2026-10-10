@@ -1,51 +1,60 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
   <title id="title">ماه من</title>
-  <desc id="desc">هلالی از نور، قلبی کوچک و ستاره‌هایی در آسمان شب.</desc>
+  <desc id="desc">نشانِ ماه‌گونِ ماه من؛ هلالی روشن در مدارِ ستاره‌ای قلب‌نشان.</desc>
   <defs>
-    <linearGradient id="night" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#100914"/>
-      <stop offset=".54" stop-color="#1d0b1a"/>
+    <linearGradient id="night" x1=".12" y1=".04" x2=".88" y2=".96">
+      <stop offset="0" stop-color="#1b1020"/>
+      <stop offset=".52" stop-color="#100914"/>
       <stop offset="1" stop-color="#08070c"/>
     </linearGradient>
-    <radialGradient id="aura" cx="46%" cy="51%" r="55%">
-      <stop offset="0" stop-color="#b44277" stop-opacity=".38"/>
-      <stop offset=".52" stop-color="#662346" stop-opacity=".19"/>
-      <stop offset="1" stop-color="#180b19" stop-opacity="0"/>
+    <radialGradient id="aura" cx="50%" cy="49%" r="54%">
+      <stop offset="0" stop-color="#a43c70" stop-opacity=".42"/>
+      <stop offset=".44" stop-color="#632344" stop-opacity=".2"/>
+      <stop offset="1" stop-color="#100914" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="moon" x1=".16" y1=".13" x2=".82" y2=".9">
-      <stop offset="0" stop-color="#fff9f2"/>
-      <stop offset=".42" stop-color="#ffd9e8"/>
-      <stop offset=".78" stop-color="#f1a7c5"/>
+    <linearGradient id="moon" x1=".18" y1=".1" x2=".8" y2=".93">
+      <stop offset="0" stop-color="#fffaf3"/>
+      <stop offset=".38" stop-color="#ffd9e8"/>
+      <stop offset=".72" stop-color="#f1a1c2"/>
       <stop offset="1" stop-color="#e8c58a"/>
     </linearGradient>
-    <linearGradient id="heart" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#fff4ed"/>
-      <stop offset=".55" stop-color="#f18ab8"/>
-      <stop offset="1" stop-color="#bd547d"/>
+    <linearGradient id="star" x1=".18" y1=".12" x2=".84" y2=".9">
+      <stop offset="0" stop-color="#fff9ec"/>
+      <stop offset=".42" stop-color="#f9d7cf"/>
+      <stop offset="1" stop-color="#e8c58a"/>
     </linearGradient>
-    <filter id="soft-glow" x="-80%" y="-80%" width="260%" height="260%">
-      <feGaussianBlur stdDeviation="12" result="blur"/>
+    <linearGradient id="orbit" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffd6e7" stop-opacity=".08"/>
+      <stop offset=".48" stop-color="#e8c58a" stop-opacity=".72"/>
+      <stop offset="1" stop-color="#f18ab8" stop-opacity=".14"/>
+    </linearGradient>
+    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="11" result="blur"/>
       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="soft-glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="24"/>
     </filter>
     <mask id="crescent" x="0" y="0" width="512" height="512" maskUnits="userSpaceOnUse">
       <rect width="512" height="512" fill="#000"/>
-      <circle cx="230" cy="263" r="158" fill="#fff"/>
-      <circle cx="325" cy="185" r="151" fill="#000"/>
-    </mask>
-    <mask id="heart-cutout" x="0" y="0" width="512" height="512" maskUnits="userSpaceOnUse">
-      <rect width="512" height="512" fill="#fff"/>
-      <circle cx="325" cy="185" r="151" fill="#000"/>
+      <circle cx="222" cy="266" r="157" fill="#fff"/>
+      <circle cx="316" cy="190" r="151" fill="#000"/>
     </mask>
   </defs>
-  <rect width="512" height="512" fill="url(#night)"/>
-  <circle cx="256" cy="252" r="242" fill="url(#aura)"/>
-  <ellipse cx="256" cy="261" rx="188" ry="203" fill="none" stroke="#e8c58a" stroke-opacity=".15" stroke-width="1.4" transform="rotate(-24 256 261)"/>
-  <circle cx="230" cy="263" r="158" fill="url(#moon)" mask="url(#crescent)"/>
-  <path d="M219 313c-8-9-23-4-23 9 0 15 25 28 25 28s25-13 25-28c0-13-15-18-23-9l-2 3-2-3Z" fill="url(#heart)" filter="url(#soft-glow)" mask="url(#heart-cutout)"/>
-  <path d="M371 109c2 10 6 14 16 16-10 2-14 6-16 16-2-10-6-14-16-16 10-2 14-6 16-16Z" fill="#fff5e8"/>
-  <path d="M132 198c1.4 6.4 4.1 9.1 10.5 10.5-6.4 1.4-9.1 4.1-10.5 10.5-1.4-6.4-4.1-9.1-10.5-10.5 6.4-1.4 9.1-4.1 10.5-10.5Z" fill="#f18ab8" opacity=".9"/>
-  <path d="M385 329c1.2 5.6 3.4 7.8 9 9-5.6 1.2-7.8 3.4-9 9-1.2-5.6-3.4-7.8-9-9 5.6-1.2 7.8-3.4 9-9Z" fill="#e8c58a" opacity=".95"/>
-  <circle cx="407" cy="221" r="2.4" fill="#fff4ed" opacity=".9"/>
-  <circle cx="160" cy="355" r="2.8" fill="#e8c58a" opacity=".8"/>
-  <circle cx="293" cy="88" r="2" fill="#ffd9e8" opacity=".8"/>
+  <rect width="512" height="512" rx="112" fill="url(#night)"/>
+  <circle cx="256" cy="250" r="238" fill="url(#aura)"/>
+  <circle cx="256" cy="256" r="216" fill="none" stroke="#ffd6e7" stroke-opacity=".075" stroke-width="1.4"/>
+  <circle cx="256" cy="256" r="200" fill="none" stroke="#e8c58a" stroke-opacity=".09" stroke-width="1"/>
+  <ellipse cx="256" cy="256" rx="170" ry="218" fill="none" stroke="url(#orbit)" stroke-width="2" transform="rotate(-29 256 256)"/>
+  <ellipse cx="256" cy="256" rx="192" ry="132" fill="none" stroke="#f18ab8" stroke-opacity=".11" stroke-width="1.2" transform="rotate(29 256 256)"/>
+  <circle cx="222" cy="266" r="157" fill="url(#moon)" mask="url(#crescent)"/>
+  <path d="M130 328c26 48 67 77 117 82" fill="none" stroke="#fff5f0" stroke-opacity=".42" stroke-width="2" stroke-linecap="round"/>
+  <path d="M329 151c8 50 22 72 69 88-47 14-61 38-69 91-9-53-22-77-70-91 48-16 61-38 70-88Z" fill="url(#star)" opacity=".96" filter="url(#glow)"/>
+  <path d="M329 222c-11-14-31-8-31 8 0 18 31 37 31 37s31-19 31-37c0-16-20-22-31-8Z" fill="#47162f" stroke="#fff2e8" stroke-opacity=".72" stroke-width="2.5"/>
+  <path d="M171 161c2 13 8 19 21 21-13 2-19 8-21 21-2-13-8-19-21-21 13-2 19-8 21-21Z" fill="#f18ab8"/>
+  <path d="M381 346c1.5 10 6 14.5 16 16-10 1.5-14.5 6-16 16-1.5-10-6-14.5-16-16 10-1.5 14.5-6 16-16Z" fill="#e8c58a"/>
+  <circle cx="404" cy="192" r="4" fill="#fff5f0" opacity=".9"/>
+  <circle cx="120" cy="244" r="3" fill="#e8c58a" opacity=".85"/>
+  <circle cx="256" cy="102" r="2.5" fill="#ffd6e7" opacity=".72"/>
+  <circle cx="355" cy="408" r="2.2" fill="#fff5f0" opacity=".75"/>
 </svg>

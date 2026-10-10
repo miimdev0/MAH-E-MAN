@@ -52,6 +52,8 @@
   const body = document.body;
   const announcer = $("#screen-announcer");
   const errorBox = $("#timer-error");
+  const loadingScreen = $("#loading-screen");
+  const loadingStartedAt = performance.now();
   const soundButton = $("#sound-toggle");
   const musicButton = $("#music-toggle");
   const musicPlayer = $("#background-music");
@@ -202,6 +204,16 @@
     if (window.console && typeof window.console.error === "function") {
       console.error("MAH-E MAN time-zone initialization failed.", error);
     }
+  }
+
+  function dismissLoadingScreen() {
+    if (!loadingScreen) return;
+    const minimumTime = 760;
+    const remaining = Math.max(0, minimumTime - (performance.now() - loadingStartedAt));
+    window.setTimeout(() => {
+      loadingScreen.classList.add("is-hidden");
+      loadingScreen.setAttribute("aria-hidden", "true");
+    }, remaining);
   }
 
   function activateScreen(sceneName) {
@@ -445,11 +457,16 @@
 
   function enableMaterialSymbolsWhenAvailable() {
     if (!document.fonts || typeof document.fonts.load !== "function") return;
-    document.fonts.load('24px "Material Symbols Rounded"', "volume_off replay expand_more")
-      .then(faces => {
-        if (faces.length > 0) root.classList.add("material-symbols-ready");
-      })
-      .catch(() => { /* Inline SVG icons remain visible if Google Fonts cannot load. */ });
+    const loadSymbols = () => {
+      document.fonts.load('24px "Material Symbols Rounded"', "volume_off replay expand_more")
+        .then(faces => {
+          if (faces.length > 0) root.classList.add("material-symbols-ready");
+        })
+        .catch(() => { /* Inline SVG icons remain visible if Google Fonts cannot load. */ });
+    };
+    const optionalStylesheet = $("link[data-optional-icons]");
+    if (optionalStylesheet) optionalStylesheet.addEventListener("load", loadSymbols, { once: true });
+    loadSymbols();
   }
 
   async function enableOptionalDoranFont() {
@@ -602,13 +619,13 @@
   const notification = (() => {
     const REMINDER_ID = 20261011;
     const OPT_IN_KEY = "mah-e-man:reminder-opt-in:v1";
-    const MAX_TIMEOUT = 2_000_000_000;
-    let browserTimer = 0;
     let active = false;
 
     function isNativeRuntime() {
       const capacitor = window.Capacitor;
-      return Boolean(capacitor && typeof capacitor.isNativePlatform === "function" && capacitor.isNativePlatform());
+      if (!capacitor) return false;
+      if (typeof capacitor.isNativePlatform === "function") return capacitor.isNativePlatform();
+      return typeof capacitor.getPlatform === "function" && capacitor.getPlatform() !== "web";
     }
 
     function setStatus(message, enabled = active) {
@@ -618,7 +635,7 @@
         notificationButton.dataset.active = String(enabled);
         notificationButton.setAttribute("aria-pressed", String(enabled));
         const label = $("span", notificationButton);
-        if (label) label.textContent = enabled ? "لغو یادآوری" : "فعال کردن اعلان";
+        if (label) label.textContent = enabled ? "لغو یادآوری" : "فعال کردن اعلان گوشی";
       }
     }
 
@@ -627,7 +644,7 @@
         if (enabled) window.localStorage.setItem(OPT_IN_KEY, "true");
         else window.localStorage.removeItem(OPT_IN_KEY);
       } catch (_error) {
-        /* The native schedule still works when browser storage is unavailable. */
+        /* The Android system schedule remains valid if web storage is unavailable. */
       }
     }
 
@@ -656,80 +673,35 @@
       return true;
     }
 
-    function clearBrowserReminder() {
-      if (browserTimer) window.clearTimeout(browserTimer);
-      browserTimer = 0;
-    }
-
-    function runBrowserReminder() {
-      clearBrowserReminder();
-      const remaining = targetTimestamp - Date.now();
-      if (remaining <= 0) {
-        if ("Notification" in window && window.Notification.permission === "granted") {
-          try {
-            new window.Notification("لحظه‌ی موعود رسید 🌙", {
-              body: "مهدیه جان، هدیه‌ی ماهِ من منتظرته.",
-              icon: new URL("assets/icons/icon-192.png", document.baseURI).href
-            });
-          } catch (_error) {
-            announce("صفحه به لحظه‌ی موعود رسید؛ مرورگر نتونست اعلان رو نمایش بده.");
-          }
-        }
-        persistOptIn(false);
-        setStatus("لحظه‌ی موعود رسیده؛ امیدوارم از هدیه‌ات لذت ببری. 😊", false);
+    async function requestAndSchedule() {
+      if (!isNativeRuntime()) {
+        setStatus("برای گرفتن مجوز واقعی از سیستم گوشی، نسخه‌ی نصب‌شده‌ی اندروید را باز کن؛ این صفحه‌ی وب مجوز ساختگی نشان نمی‌دهد.", false);
         return;
       }
-      browserTimer = window.setTimeout(runBrowserReminder, Math.min(remaining, MAX_TIMEOUT));
-    }
-
-    async function requestAndSchedule() {
       if (targetTimestamp <= Date.now()) {
         setStatus("لحظه‌ی موعود رسیده و دیگر نیازی به یادآوری نیست.", false);
         return;
       }
 
-      if (isNativeRuntime()) {
-        let plugin;
-        try {
-          plugin = await getNativePlugin();
-          let permission = await plugin.checkPermissions();
-          if (permission.display !== "granted") permission = await plugin.requestPermissions();
-          if (permission.display !== "granted") {
-            persistOptIn(false);
-            setStatus("مجوز اعلان داده نشد؛ می‌تونی بعداً از تنظیمات گوشی فعالش کنی.", false);
-            return;
-          }
-          const scheduled = await scheduleNativeReminder(plugin);
-          if (!scheduled) {
-            setStatus("لحظه‌ی موعود رسیده و دیگر نیازی به یادآوری نیست.", false);
-            return;
-          }
-          persistOptIn(true);
-          setStatus("انجام شد؛ یک اعلان برای لحظه‌ی موعود تنظیم شد. ممکنه تنظیمات گوشی کمی روی زمانش اثر بذاره.", true);
-          return;
-        } catch (_error) {
-          setStatus("تنظیم اعلان انجام نشد؛ لطفاً دوباره امتحان کن.", false);
+      try {
+        const plugin = await getNativePlugin();
+        let permission = await plugin.checkPermissions();
+        if (permission.display !== "granted") permission = await plugin.requestPermissions();
+        if (permission.display !== "granted") {
+          persistOptIn(false);
+          setStatus("مجوز اعلانِ سیستم گوشی صادر نشد. از تنظیمات گوشی، اعلان‌های برنامه‌ی «ماه من» را فعال کن.", false);
           return;
         }
-      }
 
-      if (!("Notification" in window) || typeof window.Notification.requestPermission !== "function") {
-        setStatus("این مرورگر از اعلان پشتیبانی نمی‌کنه؛ نسخه‌ی اندروید رو امتحان کن.", false);
-        return;
-      }
-      try {
-        let permission = window.Notification.permission;
-        if (permission !== "granted") permission = await window.Notification.requestPermission();
-        if (permission !== "granted") {
-          persistOptIn(false);
-          setStatus("مجوز اعلان داده نشد؛ می‌تونی از تنظیمات مرورگر فعالش کنی.", false);
+        const scheduled = await scheduleNativeReminder(plugin);
+        if (!scheduled) {
+          setStatus("لحظه‌ی موعود رسیده و دیگر نیازی به یادآوری نیست.", false);
           return;
         }
         persistOptIn(true);
-        runBrowserReminder();
-        setStatus("یادآوری فعاله؛ در نسخه‌ی وب، صفحه باید تا آن زمان باز بمونه.", true);
+        setStatus("مجوز سیستم تأیید شد و یادآوری روی گوشی تنظیم شد. محدودیت‌های باتری ممکنه زمان تحویل را کمی جابه‌جا کنه.", true);
       } catch (_error) {
-        setStatus("مرورگر نتونست مجوز اعلان رو بگیره؛ از نسخه‌ی اندروید استفاده کن.", false);
+        setStatus("سیستم گوشی یادآوری را تنظیم نکرد. مجوز اعلان برنامه را در تنظیمات بررسی و دوباره تلاش کن.", false);
       }
     }
 
@@ -742,49 +714,49 @@
             const plugin = await getNativePlugin();
             await plugin.cancel({ notifications: [{ id: REMINDER_ID }] });
           }
-          clearBrowserReminder();
           persistOptIn(false);
-          setStatus("یادآوری لغو شد.", false);
+          setStatus("یادآوری گوشی لغو شد.", false);
         } else {
           await requestAndSchedule();
         }
       } catch (_error) {
-        setStatus("یادآوری تغییر نکرد؛ لطفاً دوباره امتحان کن.", active);
+        setStatus("وضعیت اعلان تغییر نکرد؛ لطفاً مجوز سیستم گوشی را بررسی کن.", active);
       } finally {
         notificationButton.disabled = false;
       }
     }
 
     async function restore() {
+      if (!isNativeRuntime()) return;
       let optedIn = false;
       try { optedIn = window.localStorage.getItem(OPT_IN_KEY) === "true"; } catch (_error) { return; }
-      if (!optedIn || targetTimestamp <= Date.now()) return;
-      if (isNativeRuntime()) {
-        try {
-          const plugin = await getNativePlugin();
-          const permission = await plugin.checkPermissions();
-          if (permission.display !== "granted") {
-            persistOptIn(false);
-            setStatus("مجوز اعلان خاموش شده؛ برای یادآوری دوباره اجازه بده.", false);
-            return;
-          }
-          await scheduleNativeReminder(plugin);
-          setStatus("یادآوری برای لحظه‌ی موعود فعاله؛ تنظیمات گوشی ممکنه کمی روی زمانش اثر بذاره.", true);
-        } catch (_error) {
-          setStatus("برای فعال شدن یادآوری، دوباره دکمه‌ی اعلان رو بزن.", false);
-        }
+      if (!optedIn) return;
+      if (targetTimestamp <= Date.now()) {
+        persistOptIn(false);
+        setStatus("لحظه‌ی موعود رسیده؛ امیدوارم از هدیه‌ات لذت ببری. 😊", false);
         return;
       }
-      if ("Notification" in window && window.Notification.permission === "granted") {
-        runBrowserReminder();
-        setStatus("یادآوری فعاله؛ در نسخه‌ی وب، صفحه باید تا آن زمان باز بمونه.", true);
-      } else {
-        persistOptIn(false);
+      try {
+        const plugin = await getNativePlugin();
+        const permission = await plugin.checkPermissions();
+        if (permission.display !== "granted") {
+          persistOptIn(false);
+          setStatus("مجوز اعلان گوشی خاموش شده؛ از تنظیمات برنامه دوباره فعالش کن.", false);
+          return;
+        }
+        await scheduleNativeReminder(plugin);
+        setStatus("یادآوری روی گوشی فعاله؛ تنظیمات باتری ممکنه زمان تحویل را کمی جابه‌جا کنه.", true);
+      } catch (_error) {
+        setStatus("یادآوری پیدا نشد؛ دکمه را دوباره بزن تا مجوز و زمان‌بندی بررسی شود.", false);
       }
     }
 
     function initialize() {
       if (notificationButton) notificationButton.addEventListener("click", () => { void toggle(); });
+      if (!isNativeRuntime()) {
+        setStatus("مجوز واقعی اعلان فقط از داخل برنامه‌ی نصب‌شده‌ی اندروید گرفته می‌شود.", false);
+        return;
+      }
       void restore();
     }
 
@@ -855,8 +827,8 @@
         angle: random(0, Math.PI * 2),
         phase: random(0, Math.PI * 2)
       }));
-      render(performance.now());
-      requestFrame();
+      if (shouldAnimate()) requestFrame();
+      else render(performance.now());
     }
 
     function drawStars(timeSeconds, deltaSeconds) {
@@ -1013,9 +985,8 @@
 
     function shouldAnimate() {
       if (!visible || reducedMotion) return false;
-      if (mode.state === "FINAL_COUNTDOWN" && mode.secondsLeft <= 1) return false;
-      if (mode.state === "WAITING" || mode.state === "FINAL_COUNTDOWN") return true;
-      return mode.scene === "reveal" || mode.scene === "ending";
+      if (mode.scene === "reveal" || mode.scene === "ending") return true;
+      return mode.state === "FINAL_COUNTDOWN" && mode.secondsLeft > 1 && mode.secondsLeft <= 5;
     }
 
     function frame(timestamp) {
@@ -1025,12 +996,12 @@
     }
 
     function requestFrame() {
-      if (!context || !visible) return;
-      if (frameHandle) window.cancelAnimationFrame(frameHandle);
+      if (!context || !visible || frameHandle) return;
       frameHandle = window.requestAnimationFrame(frame);
     }
 
     function setState(next) {
+      if (Object.entries(next).every(([key, value]) => mode[key] === value)) return;
       mode = { ...mode, ...next };
       if (!context) return;
       if (shouldAnimate()) requestFrame();
@@ -1143,6 +1114,8 @@
       updateAndSchedule();
     } catch (error) {
       showTimerError(error);
+    } finally {
+      dismissLoadingScreen();
     }
   }
 

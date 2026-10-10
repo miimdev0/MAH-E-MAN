@@ -16,7 +16,7 @@
   <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
   <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
   <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,-50..200" rel="stylesheet">
+  <link data-optional-icons href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,-50..200" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="style.css">
   <script src="script.js" defer></script>
 </head>
@@ -53,6 +53,20 @@
     </defs>
   </svg>
 
+  <div id="loading-screen" class="loading-screen" role="status" aria-live="polite" aria-label="در حال آماده‌سازی هدیه">
+    <div class="loading-content">
+      <div class="loading-emblem" aria-hidden="true">
+        <span class="loading-orbit loading-orbit-one"></span>
+        <span class="loading-orbit loading-orbit-two"></span>
+        <svg class="loading-moon" viewBox="0 0 220 220" focusable="false"><use href="#moon-artwork" /></svg>
+        <span class="loading-star"></span>
+      </div>
+      <p class="loading-brand">ماه من <span lang="en" dir="ltr">MAH-E MAN</span></p>
+      <span class="loading-track" aria-hidden="true"><span></span></span>
+      <p class="loading-caption">داریم ماه رو برای یه لحظه‌ی قشنگ روشن می‌کنیم</p>
+    </div>
+  </div>
+
   <canvas id="sky-canvas" aria-hidden="true"></canvas>
   <div class="ambient-light ambient-light-one" aria-hidden="true"></div>
   <div class="ambient-light ambient-light-two" aria-hidden="true"></div>
@@ -80,6 +94,8 @@
       <div class="waiting-layout">
         <p class="brand-mark"><span>ماه من</span><i aria-hidden="true"></i><span lang="en" dir="ltr">MAH-E MAN</span></p>
         <div class="moon-stage" aria-hidden="true">
+          <span class="moon-orbit moon-orbit-one"></span>
+          <span class="moon-orbit moon-orbit-two"></span>
           <span class="moon-halo"></span>
           <span class="moon-seed"></span>
           <svg class="moon-art" viewBox="0 0 220 220" focusable="false"><use href="#moon-artwork" /></svg>
@@ -100,14 +116,15 @@
             <div class="countdown-unit" role="group" aria-label="۰۰ ثانیه"><span id="count-seconds" class="countdown-value" aria-hidden="true">۰۰</span><span class="countdown-label" aria-hidden="true">ثانیه</span></div>
           </div>
         </div>
+        <p class="countdown-date"><span class="date-star" aria-hidden="true">✦</span> ۱۱ اکتبر ۲۰۲۶ <i aria-hidden="true"></i> ساعت ۰۰:۰۰ تهران</p>
         <p class="secret-note">این راز، سرِ وقتش خودش رو نشون می‌ده<span class="note-ellipsis" aria-hidden="true">...</span></p>
         <div class="reminder-panel">
           <p class="reminder-prompt">می‌خوای لحظه‌ی موعود رو یادت بندازم؟</p>
           <button id="notification-toggle" class="reminder-button" type="button" aria-pressed="false" aria-describedby="notification-status">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/><path d="M10 17h4"/></svg>
-            <span>فعال کردن اعلان</span>
+            <span>فعال کردن اعلان گوشی</span>
           </button>
-          <p id="notification-status" class="reminder-status" role="status" aria-live="polite">فقط با اجازه‌ی تو، یک یادآوری برای لحظه‌ی موعود تنظیم می‌شه.</p>
+          <p id="notification-status" class="reminder-status" role="status" aria-live="polite">مجوز واقعی اعلان فقط در نسخه‌ی نصب‌شده‌ی اندروید و پس از لمس دکمه گرفته می‌شه.</p>
         </div>
       </div>
     </section>
@@ -214,6 +231,7 @@
   </aside>
 
   <noscript>
+    <style>#loading-screen { display: none !important; }</style>
     <p class="noscript-message">برای دیدن این هدیه‌ی کوچک، لطفاً جاوااسکریپت را در مرورگرت فعال کن.</p>
   </noscript>
 </body>

@@ -1,5 +1,5 @@
 # Optional music
 
-No song is included. To add one, place your licensed MP3 here as `song.mp3`.
-The player appears only when `audio/song.mp3` exists, and playback starts only
-when the listener taps its music button (mobile browsers block reliable autoplay).
+The project currently includes `song.mp3`. Playback is optional and starts only
+when the listener taps the music button (mobile browsers block reliable autoplay).
+Replace the track only with audio you have permission to distribute.

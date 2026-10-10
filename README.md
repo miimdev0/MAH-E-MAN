@@ -31,7 +31,7 @@ Run a static server from the repository root, for example:
 python3 -m http.server 8000 --bind 0.0.0.0
 ```
 
-Open `http://localhost:8000/`. The countdown is based on **11 October 2026 at 00:00 in `Asia/Tehran`**, converted with the browser's IANA time-zone database (no hard-coded offset). As with any static client-side page, the device clock and local storage are not a trusted security boundary; this protects against accidental early display, not intentional tampering.
+Open `http://localhost:8000/`. A short illustrated loading screen introduces the experience; the home scene then displays the countdown target and Tehran time. The countdown is based on **11 October 2026 at 00:00 in `Asia/Tehran`**, converted with the browser's IANA time-zone database (no hard-coded offset). It resynchronizes on foreground/focus and limits continuous canvas animation to the moments that need it, so the second display stays responsive without a busy background loop. As with any static client-side page, the device clock and local storage are not a trusted security boundary; this protects against accidental early display, not intentional tampering.
 
 To preview every scene without waiting, temporarily change `APP_CONFIG` near the top of `script.js` to:
 
@@ -44,19 +44,19 @@ Keep the target settings below it unchanged and open the page on `localhost`. A 
 
 ## Icon
 
-`assets/icon.svg` is the master moon-and-heart mark. The PWA icon sizes are under `assets/icons/`; Android launcher and notification icons are under `assets/android/`. Both deployment workflows package these assets.
+`assets/icon.svg` is the master lunar seal: a luminous crescent, a heart-centered star, and fine orbital rings. The PWA icon sizes are under `assets/icons/`; Android launcher and notification icons are under `assets/android/`. Both deployment workflows package these assets.
 
 ## Fonts
 
-The root `font/` folder contains the licensed Vazirmatn Arabic/Persian and Latin WOFF2 subsets. Add your licensed Doran WOFF2 file as **`font/Doran.woff2`**. The existing Capacitor upload slot **`www/font/Doran.woff2`** is also supported for compatibility. Pages and Android package either location; the page switches to Doran when the file loads and otherwise uses Vazirmatn. Keep the actual file extension and format accurate.
+The root `font/` folder contains Vazirmatn Arabic/Persian and Latin WOFF2 subsets plus Doran at **`font/Doran.woff2`**. The compatibility upload slot **`www/font/Doran.woff2`** is also supported; both files are currently preserved. Pages and Android package either location. The page uses Doran when it loads and otherwise falls back to Vazirmatn. Keep the actual file extension and format accurate.
 
 ## Music
 
-There is **no song included yet**. The existing sound button plays quiet synthesized chimes after a tap; it is not a music track. To add optional music, place your licensed MP3 at **`audio/song.mp3`**. The music button appears only when that file exists, and playback starts only after the user taps it—mobile browsers block reliable autoplay. The website and APK workflows copy supplied audio files into the build.
+The project currently includes a track at **`audio/song.mp3`**. Music is optional and starts only after the visitor taps the music button; it never autoplays. The separate sound button plays quiet synthesized chimes. To replace the track, use a file you have permission to distribute; the music button appears only when `audio/song.mp3` is available. The website and APK workflows package that file.
 
 ## Notifications
 
-The waiting screen offers an **Enable notification** button. The phone's permission prompt appears only after the visitor taps it; if granted, Android schedules one local reminder for the countdown target. It uses Capacitor's local-notifications plugin, so it does not need a push server. The Android reminder is deliberately scheduled without asking for special exact-alarm access; battery/background restrictions can still shift its delivery time slightly. In a normal browser, permission is requested too, but its timer only works while the page stays open; reliable reminders after closing the page are provided by the Android app, not the static website. This is a local reminder, not remote push messaging.
+The waiting screen offers an **Enable phone notification** button. It asks for notification permission only after a tap inside the installed Android app; Capacitor Local Notifications checks and requests the real Android system permission, then schedules one native local reminder for the target time. Android 13 and later show the runtime permission dialog; older Android versions may not need one. The reminder is scheduled as non-exact and the app does not ask the user to grant special exact-alarm access, so Android battery/background restrictions can shift delivery slightly. A website preview never shows a browser permission dialog pretending to be phone permission, and it does not schedule a reminder; the reminder is available only in the installed Android app. This is a local notification, not remote push messaging.
 
 ## GitHub Pages
 
