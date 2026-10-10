@@ -1,0 +1,75 @@
+name: Build MAH-E MAN Android APK
+
+on:
+  push:
+    branches:
+      - main
+      - arena/71892375-mah-e-man
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android 16 SDK components
+        run: sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Install Capacitor dependencies
+        run: npm ci
+
+      - name: Stage the three website sources in Capacitor's www directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p www/font
+          cp html.html www/index.html
+          cp css.css js.js site.webmanifest moon-icon.svg moon-icon-192.png moon-icon-512.png www/
+          cp -R font/. www/font/
+          rm -f www/font/.gitkeep
+          test -f www/index.html
+          test -f www/font/vazirmatn-arabic-wght-normal.woff2
+
+      - name: Generate the Android project
+        run: npx cap add android
+
+      - name: Sync the web app into Android
+        run: npx cap sync android
+
+      - name: Build the installable debug APK
+        working-directory: android
+        run: ./gradlew --no-daemon --stacktrace assembleDebug
+
+      - name: Upload the APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MAH-E-MAN-android-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30

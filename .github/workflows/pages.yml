@@ -1,0 +1,63 @@
+name: Build and deploy MAH-E MAN
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Assemble the static site
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f html.html
+          test -f css.css
+          test -f js.js
+          test -f site.webmanifest
+          test -f moon-icon.svg
+          test -f moon-icon-192.png
+          test -f moon-icon-512.png
+          test -f font/vazirmatn-arabic-wght-normal.woff2
+          test -f font/OFL.txt
+          test -d www/font
+          rm -rf _site
+          mkdir -p _site/font
+          cp html.html _site/index.html
+          cp css.css js.js site.webmanifest moon-icon.svg moon-icon-192.png moon-icon-512.png _site/
+          cp font/vazirmatn-arabic-wght-normal.woff2 font/vazirmatn-latin-wght-normal.woff2 font/OFL.txt _site/font/
+          find www/font -maxdepth 1 -type f ! -name '.gitkeep' -exec cp {} _site/font/ \;
+
+      - name: Upload the Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Publish to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

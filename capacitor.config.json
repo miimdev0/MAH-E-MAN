@@ -1,0 +1,8 @@
+{
+  "appId": "com.mojtaba.maheman",
+  "appName": "ماه من",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

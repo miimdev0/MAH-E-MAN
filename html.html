@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#08070C">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="یک راز کوچک، یک شبِ پر از ماه؛ هدیه‌ای از مجتبی برای مهدیه.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>ماه من | MAH-E MAN</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="moon-icon.svg">
+  <link rel="apple-touch-icon" href="moon-icon-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,-50..200" rel="stylesheet">
+  <link rel="stylesheet" href="css.css">
+  <script src="js.js" defer></script>
+</head>
+<body>
+  <svg class="svg-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <defs>
+      <radialGradient id="moon-aura" cx="48%" cy="48%" r="55%">
+        <stop offset="0" stop-color="#F18AB8" stop-opacity=".22" />
+        <stop offset=".48" stop-color="#8E365A" stop-opacity=".10" />
+        <stop offset="1" stop-color="#8E365A" stop-opacity="0" />
+      </radialGradient>
+      <linearGradient id="moon-face" x1=".18" y1=".12" x2=".82" y2=".92">
+        <stop offset="0" stop-color="#FFF5F0" />
+        <stop offset=".38" stop-color="#FFD6E7" />
+        <stop offset=".78" stop-color="#E8C58A" />
+        <stop offset="1" stop-color="#C87991" />
+      </linearGradient>
+      <linearGradient id="moon-edge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#FFF8F3" stop-opacity=".95" />
+        <stop offset="1" stop-color="#F18AB8" stop-opacity=".18" />
+      </linearGradient>
+      <mask id="moon-crescent-mask" x="0" y="0" width="220" height="220" maskUnits="userSpaceOnUse">
+        <rect width="220" height="220" fill="#000" />
+        <circle cx="110" cy="110" r="75" fill="#fff" />
+        <circle cx="151" cy="78" r="72" fill="#000" />
+      </mask>
+      <symbol id="moon-artwork" viewBox="0 0 220 220">
+        <circle cx="110" cy="110" r="107" fill="url(#moon-aura)" />
+        <circle cx="110" cy="110" r="75" fill="url(#moon-face)" mask="url(#moon-crescent-mask)" />
+        <path d="M62 164c15 17 38 25 61 21" fill="none" stroke="url(#moon-edge)" stroke-width="1.4" stroke-linecap="round" opacity=".72" />
+        <circle cx="65" cy="63" r="1.5" fill="#FFF5F0" opacity=".72" />
+        <circle cx="81" cy="50" r="1" fill="#E8C58A" opacity=".7" />
+      </symbol>
+    </defs>
+  </svg>
+
+  <canvas id="sky-canvas" aria-hidden="true"></canvas>
+  <div class="ambient-light ambient-light-one" aria-hidden="true"></div>
+  <div class="ambient-light ambient-light-two" aria-hidden="true"></div>
+  <div class="screen-vignette" aria-hidden="true"></div>
+
+  <div class="utility-controls" aria-label="تنظیمات صدا">
+    <button id="sound-toggle" class="icon-button" type="button" aria-label="روشن کردن آواهای ظریف" aria-pressed="false" title="روشن کردن آواهای ظریف">
+      <span class="material-symbols-rounded" aria-hidden="true">volume_off</span>
+      <span class="icon-fallback" aria-hidden="true">
+        <svg class="volume-off-icon" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="m16 9 5 6m0-6-5 6"/></svg>
+        <svg class="volume-on-icon" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7m2.8-9.8a9 9 0 0 1 0 12.6"/></svg>
+      </span>
+    </button>
+  </div>
+
+  <main id="experience" class="experience" aria-label="ماه من، هدیه‌ای از مجتبی برای مهدیه">
+    <section id="waiting-screen" class="screen screen-waiting is-active" aria-labelledby="waiting-heading" aria-hidden="false">
+      <div class="waiting-layout">
+        <p class="brand-mark"><span>ماه من</span><i aria-hidden="true"></i><span lang="en" dir="ltr">MAH-E MAN</span></p>
+        <div class="moon-stage" aria-hidden="true">
+          <span class="moon-halo"></span>
+          <span class="moon-seed"></span>
+          <svg class="moon-art" viewBox="0 0 220 220" focusable="false"><use href="#moon-artwork" /></svg>
+          <span class="moon-star moon-star-one"></span>
+          <span class="moon-star moon-star-two"></span>
+          <span class="moon-star moon-star-three"></span>
+        </div>
+        <div class="waiting-copy">
+          <h1 id="waiting-heading" class="opening-line">ماهیِ من... یه اتفاق قشنگ در راهه. <span class="text-moon" aria-hidden="true">🌙</span></h1>
+          <p class="second-line">بعضی لحظه‌ها، ارزش تمامِ انتظار رو دارن.</p>
+        </div>
+        <div class="countdown-block">
+          <p class="countdown-caption">تا رسیدنِ اون لحظه</p>
+          <div class="countdown-frame" role="group" aria-label="زمان باقی‌مانده تا لحظه‌ی موعود">
+            <div class="countdown-unit" role="group" aria-label="۰۰ روز"><span id="count-days" class="countdown-value" aria-hidden="true">۰۰</span><span class="countdown-label" aria-hidden="true">روز</span></div>
+            <div class="countdown-unit" role="group" aria-label="۰۰ ساعت"><span id="count-hours" class="countdown-value" aria-hidden="true">۰۰</span><span class="countdown-label" aria-hidden="true">ساعت</span></div>
+            <div class="countdown-unit" role="group" aria-label="۰۰ دقیقه"><span id="count-minutes" class="countdown-value" aria-hidden="true">۰۰</span><span class="countdown-label" aria-hidden="true">دقیقه</span></div>
+            <div class="countdown-unit" role="group" aria-label="۰۰ ثانیه"><span id="count-seconds" class="countdown-value" aria-hidden="true">۰۰</span><span class="countdown-label" aria-hidden="true">ثانیه</span></div>
+          </div>
+        </div>
+        <p class="secret-note">این راز، سرِ وقتش خودش رو نشون می‌ده<span class="note-ellipsis" aria-hidden="true">...</span></p>
+      </div>
+    </section>
+
+    <section id="final-screen" class="screen screen-final" aria-labelledby="final-heading" aria-hidden="true" hidden>
+      <div class="final-layout">
+        <p class="final-overline">فقط برای ماهِ من</p>
+        <div class="final-visual" aria-hidden="true">
+          <div class="final-aura"></div>
+          <svg class="final-moon moon-art" viewBox="0 0 220 220" focusable="false"><use href="#moon-artwork" /></svg>
+          <svg class="final-heart" viewBox="0 0 240 240" focusable="false"><path d="M120 211C101 193 34 151 34 91c0-34 25-57 57-57 15 0 26 9 29 19 4-10 15-19 30-19 32 0 57 23 57 57 0 60-67 102-87 120Z" /></svg>
+          <div class="final-dial" id="final-dial" style="--progress: 0%">
+            <span id="final-number" class="final-number">۶۰</span>
+            <span class="final-unit">ثانیه</span>
+          </div>
+        </div>
+        <h1 id="final-heading" class="final-message" aria-live="polite" aria-atomic="true">ماهی، یه لحظه چشماتو به اینجا بسپار...</h1>
+        <p class="final-whisper">یه نفسِ آروم؛ لحظه نزدیکه.</p>
+      </div>
+    </section>
+
+    <section id="reveal-screen" class="screen screen-reveal" data-beat="seed" aria-labelledby="reveal-heading" aria-hidden="true" hidden>
+      <div class="reveal-layout">
+        <div class="reveal-visual" aria-hidden="true">
+          <div class="reveal-aura"></div>
+          <div class="reveal-core"></div>
+          <div class="reveal-orbit reveal-orbit-one"></div>
+          <div class="reveal-orbit reveal-orbit-two"></div>
+          <svg class="reveal-heart" viewBox="0 0 240 240" focusable="false"><path d="M120 211C101 193 34 151 34 91c0-34 25-57 57-57 15 0 26 9 29 19 4-10 15-19 30-19 32 0 57 23 57 57 0 60-67 102-87 120Z" /></svg>
+          <svg class="reveal-moon moon-art" viewBox="0 0 220 220" focusable="false"><use href="#moon-artwork" /></svg>
+        </div>
+        <div class="reveal-copy" aria-live="off">
+          <h1 id="reveal-heading" class="sr-only">لحظه‌ی موعود رسید</h1>
+          <p class="reveal-line" data-reveal-line="0" aria-hidden="true">مهدیه جان...</p>
+          <p class="reveal-line" data-reveal-line="1" aria-hidden="true">ماهِ من، این همه انتظار فقط برای یه چیز بود...</p>
+          <p class="reveal-line" data-reveal-line="2" aria-hidden="true">اینکه یه بار دیگه بهت بگم چقدر بودنت برای من قشنگه.</p>
+          <p class="reveal-line reveal-wish" data-reveal-line="3" aria-hidden="true">روز دخترت مبارک، ماهِ من <span class="text-heart" aria-hidden="true">❤️</span></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="letter-screen" class="screen screen-letter" aria-labelledby="letter-heading" aria-hidden="true" hidden>
+      <div class="letter-stage">
+        <div id="letter-scroll" class="letter-scroll" tabindex="0" aria-label="نامه‌ی مجتبی برای مهدیه؛ برای خواندن به پایین بروید">
+          <article class="letter-manuscript">
+            <p class="letter-overline">از دلِ مجتبی، برای ماهِ خودش</p>
+            <span class="letter-rule" aria-hidden="true"></span>
+            <h1 id="letter-heading" tabindex="-1">مهدیه‌ی من،</h1>
+            <div class="letter-body">
+              <p>ماهیِ قشنگم، نمی‌دونم چطور باید از بین این همه کلمه، اون چیزی رو بگم که واقعاً توی دلمه.</p>
+              <p>فقط می‌دونم از وقتی تو وارد دنیای من شدی، بعضی چیزها برام رنگ دیگه‌ای گرفتن. یه پیام از تو می‌تونه روزم رو قشنگ‌تر کنه، یه لبخندت می‌تونه حال دلم رو عوض کنه و حتی فکر کردن بهت، وسط شلوغ‌ترین لحظه‌ها، یه گوشه از دنیام رو آروم می‌کنه.</p>
+              <p>دخترم، من نمی‌خوام دوست داشتنم فقط توی حرف‌های قشنگ خلاصه بشه. دلم می‌خواد توی روزهای معمولی، توی وقت‌هایی که خسته‌ای، وقتی خوشحالی و حتی وقتی دنیا اون‌طوری که می‌خوای پیش نمی‌ره، با رفتارم بهت نشون بدم که چقدر برام عزیزی.</p>
+              <p>خانومم، تو لازم نیست همیشه قوی باشی، همیشه بخندی یا همیشه حالت خوب باشه. دلم می‌خواد کنار من بتونی خودت باشی؛ با تمام خنده‌هات، دلخوری‌هات، شیطنت‌هات و آرزوهات.</p>
+              <p>امروز بهونه‌ایه برای اینکه دوباره بهت بگم: امیدوارم دنیا باهات مهربون باشه، به آرزوهات برسی و همیشه دلیل‌هایی برای لبخند زدن داشته باشی.</p>
+              <p>و من؟ من امیدوارم بتونم سهم کوچیکی از قشنگی‌های زندگی‌ات باشم؛ کسی که حضورش برات حس خوب، آرامش و خاطره‌های قشنگ میاره.</p>
+              <p class="letter-blessing">روز دختر مبارک، ماهِ من.</p>
+            </div>
+            <p class="letter-signature">با تمام محبتم،<br><span>مجتبی <span class="text-heart" aria-label="عشق">❤️</span></span></p>
+            <span class="letter-rule letter-rule-bottom" aria-hidden="true"></span>
+            <button id="continue-button" class="text-button" type="button">
+              <span>بقیه‌ی قصه</span>
+              <span class="material-symbols-rounded" aria-hidden="true">expand_more</span>
+              <svg class="button-fallback" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
+            </button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="ending-screen" class="screen screen-ending" aria-labelledby="ending-heading" aria-hidden="true" hidden>
+      <div class="ending-layout">
+        <div class="ending-moon-stage" aria-hidden="true">
+          <span class="ending-moon-aura"></span>
+          <svg class="ending-moon moon-art" viewBox="0 0 220 220" focusable="false"><use href="#moon-artwork" /></svg>
+          <span class="ending-star ending-star-one"></span>
+          <span class="ending-star ending-star-two"></span>
+          <span class="ending-star ending-star-three"></span>
+        </div>
+        <p class="ending-first">ماهیِ من، یه چیز دیگه هم هست...</p>
+        <h1 id="ending-heading" class="ending-main" tabindex="-1">مهدیه، ممنون که توی دنیای منی. امیدوارم کلی روز قشنگ، خنده، خاطره و اتفاق خوب پیش رومون باشه. دوست دارم همیشه بهت نشون بدم که چقدر ارزشمندی.</h1>
+        <p class="ending-signature">از طرف مجتبی، برای ماهِ خودش. <span aria-hidden="true">🌙❤️</span></p>
+        <button id="read-again-button" class="text-button replay-button" type="button">
+          <span class="material-symbols-rounded" aria-hidden="true">replay</span>
+          <svg class="button-fallback replay-fallback" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.9-3L3 11m0-6v6h6m-5 2a8 8 0 0 0 14.9 3L21 13m0 6v-6h-6"/></svg>
+          <span>نامه‌مو دوباره بخون</span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <p id="screen-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></p>
+  <p id="timer-error" class="timer-error" role="alert" hidden></p>
+
+  <aside id="developer-tools" class="developer-tools" aria-label="ابزار آزمایش محلی" hidden>
+    <p class="developer-tools-title">آزمایش محلی</p>
+    <div class="developer-tools-actions">
+      <button type="button" data-dev-stage="waiting">انتظار</button>
+      <button type="button" data-dev-stage="final">شمارش پایانی</button>
+      <button type="button" data-dev-stage="reveal">لحظه‌ی رونمایی</button>
+      <button type="button" data-dev-stage="letter">نامه</button>
+      <button type="button" data-dev-stage="ending">پایان</button>
+    </div>
+  </aside>
+
+  <noscript>
+    <p class="noscript-message">برای دیدن این هدیه‌ی کوچک، لطفاً جاوااسکریپت را در مرورگرت فعال کن.</p>
+  </noscript>
+</body>
+</html>
