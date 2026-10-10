@@ -17,10 +17,20 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install the web bundle dependencies
+        run: npm ci
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -29,22 +39,35 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f html.html
-          test -f css.css
-          test -f js.js
+          test -f index.html
+          test -f style.css
+          test -f script.js
           test -f site.webmanifest
-          test -f moon-icon.svg
-          test -f moon-icon-192.png
-          test -f moon-icon-512.png
+          test -f assets/icon.svg
+          test -f assets/icons/icon-192.png
+          test -f assets/icons/icon-512.png
           test -f font/vazirmatn-arabic-wght-normal.woff2
           test -f font/OFL.txt
           test -d www/font
+          test -d audio
           rm -rf _site
-          mkdir -p _site/font
-          cp html.html _site/index.html
-          cp css.css js.js site.webmanifest moon-icon.svg moon-icon-192.png moon-icon-512.png _site/
-          cp font/vazirmatn-arabic-wght-normal.woff2 font/vazirmatn-latin-wght-normal.woff2 font/OFL.txt _site/font/
-          find www/font -maxdepth 1 -type f ! -name '.gitkeep' -exec cp {} _site/font/ \;
+          mkdir -p _site/font _site/assets/icons _site/audio
+          cp index.html style.css site.webmanifest _site/
+          cp assets/icon.svg _site/assets/
+          cp assets/icons/icon-192.png assets/icons/icon-512.png _site/assets/icons/
+          cp -R font/. _site/font/
+          for asset in www/font/*; do
+            [[ -f "$asset" ]] || continue
+            [[ "$(basename "$asset")" == ".gitkeep" ]] && continue
+            [[ -e "_site/font/$(basename "$asset")" ]] && continue
+            cp "$asset" _site/font/
+          done
+          for asset in audio/*; do
+            [[ -f "$asset" ]] || continue
+            case "$(basename "$asset")" in .gitkeep|README.md) continue ;; esac
+            cp "$asset" _site/audio/
+          done
+          npx esbuild script.js --bundle --format=iife --platform=browser --target=es2022 --outfile=_site/script.js
 
       - name: Upload the Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -55,7 +78,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     steps:
       - name: Publish to GitHub Pages

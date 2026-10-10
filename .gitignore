@@ -1,20 +1,14 @@
-# Generated JavaScript dependencies and native Android project
+# Generated JavaScript dependencies and Android wrapper project
 node_modules/
-android/
+/android/
+/www/*
+!/www/font/
+/www/font/*
+!/www/font/.gitkeep
+!/www/font/Doran.woff2
 .gradle/
 
-# Capacitor web bundle (generated from the three root website sources)
-/www/index.html
-/www/css.css
-/www/js.js
-/www/site.webmanifest
-/www/moon-icon.svg
-/www/moon-icon-192.png
-/www/moon-icon-512.png
-/www/font/vazirmatn-*.woff2
-/www/font/OFL.txt
-
-# Local Android tooling / build outputs
+# Local Android tooling and build outputs
 local.properties
 *.apk
 *.aab

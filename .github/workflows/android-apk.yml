@@ -46,23 +46,39 @@ jobs:
       - name: Install Capacitor dependencies
         run: npm ci
 
-      - name: Stage the three website sources in Capacitor's www directory
+      - name: Stage the website, fonts, icons, and optional audio
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p www/font
-          cp html.html www/index.html
-          cp css.css js.js site.webmanifest moon-icon.svg moon-icon-192.png moon-icon-512.png www/
+          mkdir -p www/font www/assets/icons www/audio
+          cp index.html style.css site.webmanifest www/
+          cp assets/icon.svg www/assets/icon.svg
+          cp assets/icons/icon-192.png assets/icons/icon-512.png www/assets/icons/
           cp -R font/. www/font/
           rm -f www/font/.gitkeep
+          for asset in audio/*; do
+            [[ -f "$asset" ]] || continue
+            case "$(basename "$asset")" in .gitkeep|README.md) continue ;; esac
+            cp "$asset" www/audio/
+          done
+          npx esbuild script.js --bundle --format=iife --platform=browser --target=es2022 --outfile=www/script.js
           test -f www/index.html
           test -f www/font/vazirmatn-arabic-wght-normal.woff2
+          test -f www/assets/icons/icon-512.png
 
       - name: Generate the Android project
         run: npx cap add android
 
-      - name: Sync the web app into Android
+      - name: Sync the web app and local notifications plugin
         run: npx cap sync android
+
+      - name: Apply the MAH-E MAN Android launcher and notification icons
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp -R assets/android/. android/app/src/main/res/
+          test -f android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+          test -f android/app/src/main/res/drawable/ic_notification_moon.xml
 
       - name: Build the installable debug APK
         working-directory: android

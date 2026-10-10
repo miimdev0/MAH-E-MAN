@@ -53,6 +53,10 @@
   const announcer = $("#screen-announcer");
   const errorBox = $("#timer-error");
   const soundButton = $("#sound-toggle");
+  const musicButton = $("#music-toggle");
+  const musicPlayer = $("#background-music");
+  const notificationButton = $("#notification-toggle");
+  const notificationStatus = $("#notification-status");
   const devPanel = $("#developer-tools");
   const waitingValues = {
     days: $("#count-days"),
@@ -543,6 +547,250 @@
     return { toggle, chime, paintButton };
   })();
 
+  const music = (() => {
+    let available = false;
+
+    function paintButton() {
+      if (!musicButton) return;
+      const playing = Boolean(musicPlayer && !musicPlayer.paused);
+      const label = playing ? "توقف آهنگ" : "پخش آهنگ";
+      musicButton.hidden = !available;
+      musicButton.setAttribute("aria-pressed", String(playing));
+      musicButton.setAttribute("aria-label", label);
+      musicButton.title = label;
+      const symbol = $(".material-symbols-rounded", musicButton);
+      if (symbol) symbol.textContent = playing ? "pause" : "music_note";
+    }
+
+    async function initialize() {
+      if (!musicButton || !musicPlayer || typeof window.fetch !== "function") return;
+      musicPlayer.volume = 0.52;
+      musicPlayer.addEventListener("play", paintButton);
+      musicPlayer.addEventListener("pause", paintButton);
+      musicPlayer.addEventListener("ended", paintButton);
+      musicPlayer.addEventListener("error", () => {
+        available = false;
+        paintButton();
+        announce("فایل آهنگ پیدا نشد؛ تجربه بدون موسیقی هم کامله.");
+      });
+      try {
+        const trackUrl = new URL("audio/song.mp3", document.baseURI);
+        const response = await window.fetch(trackUrl.href, { method: "HEAD", cache: "no-store" });
+        const contentType = response.headers?.get?.("content-type") || "";
+        if (!response.ok || contentType.toLowerCase().includes("text/html")) return;
+        available = true;
+        paintButton();
+      } catch (_error) {
+        /* The optional audio/song.mp3 file has not been added yet. */
+      }
+    }
+
+    async function toggle() {
+      if (!available || !musicPlayer) return;
+      try {
+        if (musicPlayer.paused) await musicPlayer.play();
+        else musicPlayer.pause();
+      } catch (_error) {
+        announce("پخش آهنگ در این مرورگر در دسترس نیست.");
+      }
+      paintButton();
+    }
+
+    return { initialize, toggle };
+  })();
+
+  const notification = (() => {
+    const REMINDER_ID = 20261011;
+    const OPT_IN_KEY = "mah-e-man:reminder-opt-in:v1";
+    const MAX_TIMEOUT = 2_000_000_000;
+    let browserTimer = 0;
+    let active = false;
+
+    function isNativeRuntime() {
+      const capacitor = window.Capacitor;
+      return Boolean(capacitor && typeof capacitor.isNativePlatform === "function" && capacitor.isNativePlatform());
+    }
+
+    function setStatus(message, enabled = active) {
+      if (notificationStatus) notificationStatus.textContent = message;
+      active = enabled;
+      if (notificationButton) {
+        notificationButton.dataset.active = String(enabled);
+        notificationButton.setAttribute("aria-pressed", String(enabled));
+        const label = $("span", notificationButton);
+        if (label) label.textContent = enabled ? "لغو یادآوری" : "فعال کردن اعلان";
+      }
+    }
+
+    function persistOptIn(enabled) {
+      try {
+        if (enabled) window.localStorage.setItem(OPT_IN_KEY, "true");
+        else window.localStorage.removeItem(OPT_IN_KEY);
+      } catch (_error) {
+        /* The native schedule still works when browser storage is unavailable. */
+      }
+    }
+
+    async function getNativePlugin() {
+      const module = await import("@capacitor/local-notifications");
+      return module.LocalNotifications;
+    }
+
+    async function hasNativeReminder(plugin) {
+      const result = await plugin.getPending();
+      return (result.notifications || []).some(item => Number(item.id) === REMINDER_ID);
+    }
+
+    async function scheduleNativeReminder(plugin) {
+      if (targetTimestamp <= Date.now()) return false;
+      if (await hasNativeReminder(plugin)) return true;
+      await plugin.schedule({
+        notifications: [{
+          id: REMINDER_ID,
+          title: "لحظه‌ی موعود رسید 🌙",
+          body: "مهدیه جان، هدیه‌ی ماهِ من منتظرته.",
+          schedule: { at: new Date(targetTimestamp), allowWhileIdle: true },
+          isExactNotification: false
+        }]
+      });
+      return true;
+    }
+
+    function clearBrowserReminder() {
+      if (browserTimer) window.clearTimeout(browserTimer);
+      browserTimer = 0;
+    }
+
+    function runBrowserReminder() {
+      clearBrowserReminder();
+      const remaining = targetTimestamp - Date.now();
+      if (remaining <= 0) {
+        if ("Notification" in window && window.Notification.permission === "granted") {
+          try {
+            new window.Notification("لحظه‌ی موعود رسید 🌙", {
+              body: "مهدیه جان، هدیه‌ی ماهِ من منتظرته.",
+              icon: new URL("assets/icons/icon-192.png", document.baseURI).href
+            });
+          } catch (_error) {
+            announce("صفحه به لحظه‌ی موعود رسید؛ مرورگر نتونست اعلان رو نمایش بده.");
+          }
+        }
+        persistOptIn(false);
+        setStatus("لحظه‌ی موعود رسیده؛ امیدوارم از هدیه‌ات لذت ببری. 😊", false);
+        return;
+      }
+      browserTimer = window.setTimeout(runBrowserReminder, Math.min(remaining, MAX_TIMEOUT));
+    }
+
+    async function requestAndSchedule() {
+      if (targetTimestamp <= Date.now()) {
+        setStatus("لحظه‌ی موعود رسیده و دیگر نیازی به یادآوری نیست.", false);
+        return;
+      }
+
+      if (isNativeRuntime()) {
+        let plugin;
+        try {
+          plugin = await getNativePlugin();
+          let permission = await plugin.checkPermissions();
+          if (permission.display !== "granted") permission = await plugin.requestPermissions();
+          if (permission.display !== "granted") {
+            persistOptIn(false);
+            setStatus("مجوز اعلان داده نشد؛ می‌تونی بعداً از تنظیمات گوشی فعالش کنی.", false);
+            return;
+          }
+          const scheduled = await scheduleNativeReminder(plugin);
+          if (!scheduled) {
+            setStatus("لحظه‌ی موعود رسیده و دیگر نیازی به یادآوری نیست.", false);
+            return;
+          }
+          persistOptIn(true);
+          setStatus("انجام شد؛ یک اعلان برای لحظه‌ی موعود تنظیم شد. ممکنه تنظیمات گوشی کمی روی زمانش اثر بذاره.", true);
+          return;
+        } catch (_error) {
+          setStatus("تنظیم اعلان انجام نشد؛ لطفاً دوباره امتحان کن.", false);
+          return;
+        }
+      }
+
+      if (!("Notification" in window) || typeof window.Notification.requestPermission !== "function") {
+        setStatus("این مرورگر از اعلان پشتیبانی نمی‌کنه؛ نسخه‌ی اندروید رو امتحان کن.", false);
+        return;
+      }
+      try {
+        let permission = window.Notification.permission;
+        if (permission !== "granted") permission = await window.Notification.requestPermission();
+        if (permission !== "granted") {
+          persistOptIn(false);
+          setStatus("مجوز اعلان داده نشد؛ می‌تونی از تنظیمات مرورگر فعالش کنی.", false);
+          return;
+        }
+        persistOptIn(true);
+        runBrowserReminder();
+        setStatus("یادآوری فعاله؛ در نسخه‌ی وب، صفحه باید تا آن زمان باز بمونه.", true);
+      } catch (_error) {
+        setStatus("مرورگر نتونست مجوز اعلان رو بگیره؛ از نسخه‌ی اندروید استفاده کن.", false);
+      }
+    }
+
+    async function toggle() {
+      if (!notificationButton) return;
+      notificationButton.disabled = true;
+      try {
+        if (active) {
+          if (isNativeRuntime()) {
+            const plugin = await getNativePlugin();
+            await plugin.cancel({ notifications: [{ id: REMINDER_ID }] });
+          }
+          clearBrowserReminder();
+          persistOptIn(false);
+          setStatus("یادآوری لغو شد.", false);
+        } else {
+          await requestAndSchedule();
+        }
+      } catch (_error) {
+        setStatus("یادآوری تغییر نکرد؛ لطفاً دوباره امتحان کن.", active);
+      } finally {
+        notificationButton.disabled = false;
+      }
+    }
+
+    async function restore() {
+      let optedIn = false;
+      try { optedIn = window.localStorage.getItem(OPT_IN_KEY) === "true"; } catch (_error) { return; }
+      if (!optedIn || targetTimestamp <= Date.now()) return;
+      if (isNativeRuntime()) {
+        try {
+          const plugin = await getNativePlugin();
+          const permission = await plugin.checkPermissions();
+          if (permission.display !== "granted") {
+            persistOptIn(false);
+            setStatus("مجوز اعلان خاموش شده؛ برای یادآوری دوباره اجازه بده.", false);
+            return;
+          }
+          await scheduleNativeReminder(plugin);
+          setStatus("یادآوری برای لحظه‌ی موعود فعاله؛ تنظیمات گوشی ممکنه کمی روی زمانش اثر بذاره.", true);
+        } catch (_error) {
+          setStatus("برای فعال شدن یادآوری، دوباره دکمه‌ی اعلان رو بزن.", false);
+        }
+        return;
+      }
+      if ("Notification" in window && window.Notification.permission === "granted") {
+        runBrowserReminder();
+        setStatus("یادآوری فعاله؛ در نسخه‌ی وب، صفحه باید تا آن زمان باز بمونه.", true);
+      } else {
+        persistOptIn(false);
+      }
+    }
+
+    function initialize() {
+      if (notificationButton) notificationButton.addEventListener("click", () => { void toggle(); });
+      void restore();
+    }
+
+    return { initialize };
+  })();
+
   const sky = (() => {
     const canvas = $("#sky-canvas");
     const context = canvas && typeof canvas.getContext === "function" ? canvas.getContext("2d", { alpha: true }) : null;
@@ -857,8 +1105,10 @@
   function initialize() {
     enableMaterialSymbolsWhenAvailable();
     void enableOptionalDoranFont();
+    void music.initialize();
     sound.paintButton();
     if (soundButton) soundButton.addEventListener("click", () => { void sound.toggle(); });
+    if (musicButton) musicButton.addEventListener("click", () => { void music.toggle(); });
     if (continueButton) continueButton.addEventListener("click", () => moveToRevealedScene("ending", true));
     if (readAgainButton) readAgainButton.addEventListener("click", () => moveToRevealedScene("letter", true));
 
@@ -889,6 +1139,7 @@
 
     try {
       targetTimestamp = wallTimeToEpoch(APP_CONFIG.target, APP_CONFIG.target.timeZone);
+      notification.initialize();
       updateAndSchedule();
     } catch (error) {
       showTimerError(error);

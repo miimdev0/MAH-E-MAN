@@ -4,10 +4,12 @@
   "private": true,
   "description": "Capacitor Android packaging for the MAH-E MAN static website",
   "dependencies": {
-    "@capacitor/android": "8.5.3",
-    "@capacitor/core": "8.5.3"
+    "@capacitor/android": "8.4.3",
+    "@capacitor/core": "8.4.3",
+    "@capacitor/local-notifications": "8.3.1"
   },
   "devDependencies": {
-    "@capacitor/cli": "8.5.3"
+    "@capacitor/cli": "8.4.3",
+    "esbuild": "0.28.2"
   }
 }

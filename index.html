@@ -13,11 +13,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="manifest" href="site.webmanifest">
-  <link rel="icon" type="image/svg+xml" href="moon-icon.svg">
-  <link rel="apple-touch-icon" href="moon-icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,-50..200" rel="stylesheet">
-  <link rel="stylesheet" href="css.css">
-  <script src="js.js" defer></script>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
 </head>
 <body>
   <svg class="svg-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
@@ -57,7 +58,14 @@
   <div class="ambient-light ambient-light-two" aria-hidden="true"></div>
   <div class="screen-vignette" aria-hidden="true"></div>
 
-  <div class="utility-controls" aria-label="تنظیمات صدا">
+  <div class="utility-controls" aria-label="کنترل‌های صدا و آهنگ">
+    <button id="music-toggle" class="icon-button" type="button" aria-label="پخش آهنگ" aria-pressed="false" title="پخش آهنگ" hidden>
+      <span class="material-symbols-rounded" aria-hidden="true">music_note</span>
+      <span class="icon-fallback" aria-hidden="true">
+        <svg class="music-play-icon" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="18" cy="16" rx="3" ry="2"/></svg>
+        <svg class="music-pause-icon" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg>
+      </span>
+    </button>
     <button id="sound-toggle" class="icon-button" type="button" aria-label="روشن کردن آواهای ظریف" aria-pressed="false" title="روشن کردن آواهای ظریف">
       <span class="material-symbols-rounded" aria-hidden="true">volume_off</span>
       <span class="icon-fallback" aria-hidden="true">
@@ -93,6 +101,14 @@
           </div>
         </div>
         <p class="secret-note">این راز، سرِ وقتش خودش رو نشون می‌ده<span class="note-ellipsis" aria-hidden="true">...</span></p>
+        <div class="reminder-panel">
+          <p class="reminder-prompt">می‌خوای لحظه‌ی موعود رو یادت بندازم؟</p>
+          <button id="notification-toggle" class="reminder-button" type="button" aria-pressed="false" aria-describedby="notification-status">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/><path d="M10 17h4"/></svg>
+            <span>فعال کردن اعلان</span>
+          </button>
+          <p id="notification-status" class="reminder-status" role="status" aria-live="polite">فقط با اجازه‌ی تو، یک یادآوری برای لحظه‌ی موعود تنظیم می‌شه.</p>
+        </div>
       </div>
     </section>
 
@@ -182,6 +198,7 @@
     </section>
   </main>
 
+  <audio id="background-music" src="audio/song.mp3" preload="none" loop aria-hidden="true"></audio>
   <p id="screen-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></p>
   <p id="timer-error" class="timer-error" role="alert" hidden></p>
 
